@@ -1,3 +1,6 @@
+const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+const targetUrl = 'https://dev_interview.qagoodx.co.za/api/session';
+
 document
   .getElementById("login-form")
   .addEventListener("submit", async function (event) {
@@ -19,23 +22,18 @@ document
     };
 
     try {
-      const response = await fetch(
-        "https://dev_interview.qagoodx.co.za/api/session", 
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(loginData),
-          credentials: "include",
-        }
-      );
+      const response = await fetch(proxyUrl + targetUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(loginData),
+        credentials: "include",
+      });
 
       if (!response.ok) {
         throw new Error(`Network response was not ok: ${response.statusText}`);
       }
 
-      const textResponse = await response.text();
-      const data = textResponse ? JSON.parse(textResponse) : {};
-
+      const data = await response.json();
       console.log(data);
 
       if (data.session_uid) {

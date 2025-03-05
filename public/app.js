@@ -1,5 +1,5 @@
-const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
-const targetUrl = 'https://dev_interview.qagoodx.co.za/api/session';
+const proxyUrl = "https://cors-anywhere.herokuapp.com/";
+const targetUrl = "https://dev_interview.qagoodx.co.za/api/session";
 
 document
   .getElementById("login-form")

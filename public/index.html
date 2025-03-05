@@ -1,12 +1,148 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <link
+      rel="icon"
+      href="https://dev_interview.qagoodx.co.za/images/favicon.ico"
+      type="image/x-icon"
+    />
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>View Bookings</title>
     <!-- Protected page -->
     <script src="auth.js"></script>
-    <script></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+      }
+      .time-slot-container {
+        width: 400px;
+        border: 1px solid black;
+        padding: 10px;
+        position: relative;
+      }
+      .time-slot {
+        display: flex;
+        align-items: center;
+        border-bottom: 1px solid gray;
+        padding: 8px;
+        height: 30px;
+        position: relative;
+      }
+      .booking {
+        position: absolute;
+        left: 100px;
+        background: #ffcc00;
+        padding: 5px;
+        font-size: 14px;
+        font-weight: bold;
+        border-radius: 5px;
+        border: 1px solid black;
+        width: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        top: 0;
+      }
+    </style>
   </head>
-  <body></body>
+  <body>
+    <h2>Bookings</h2>
+    <button>Create booking</button>
+    <div id="schedule"></div>
+
+    <script>
+      function generateTimeSlots(startTime = "08:00", endTime = "17:00") {
+        let slots = [];
+        let [hour, minute] = startTime.split(":").map(Number);
+        let [endHour, endMinute] = endTime.split(":").map(Number);
+
+        while (hour < endHour || (hour === endHour && minute < endMinute)) {
+          let formattedTime = `${String(hour).padStart(2, "0")}:${String(
+            minute
+          ).padStart(2, "0")}`;
+          slots.push({ time: formattedTime, booking: null });
+
+          minute += 15;
+          if (minute >= 60) {
+            minute = 0;
+            hour += 1;
+          }
+        }
+        return slots;
+      }
+
+      function timeToMinutes(time) {
+        const [hour, minute] = time.split(":").map(Number);
+        return hour * 60 + minute;
+      }
+
+      function assignBookings(slots, bookings) {
+        bookings.forEach((booking) => {
+          let startMinutes = timeToMinutes(booking.start_time);
+          let endMinutes = timeToMinutes(booking.end_time);
+          let duration = (endMinutes - startMinutes) / 15;
+
+          let firstSlotIndex = slots.findIndex(
+            (s) => timeToMinutes(s.time) === startMinutes
+          );
+          if (firstSlotIndex !== -1) {
+            slots[firstSlotIndex].booking = {
+              patient_name: booking.patient_name,
+              reason: booking.reason,
+              duration: duration,
+            };
+          }
+        });
+      }
+
+      function renderSchedule(slots) {
+        const container = document.getElementById("schedule");
+        container.innerHTML = "";
+
+        slots.forEach((slot, index) => {
+          const div = document.createElement("div");
+          div.classList.add("time-slot");
+          div.innerHTML = `<span>${slot.time}</span>`;
+
+          if (slot.booking) {
+            const bookingDiv = document.createElement("div");
+            bookingDiv.classList.add("booking");
+            bookingDiv.textContent = `${slot.booking.patient_name} - ${slot.booking.reason}`;
+            bookingDiv.style.height = `${slot.booking.duration * 41}px`;
+            bookingDiv.style.lineHeight = `${slot.booking.duration * 41}px`;
+
+            div.appendChild(bookingDiv);
+          }
+
+          container.appendChild(div);
+        });
+      }
+
+      const apiBookings = [
+        {
+          start_time: "09:00",
+          end_time: "09:30",
+          patient_name: "John Doe",
+          reason: "Check-up",
+        },
+        {
+          start_time: "10:15",
+          end_time: "10:45",
+          patient_name: "Jane Smith",
+          reason: "Consultation",
+        },
+        {
+          start_time: "11:45",
+          end_time: "12:15",
+          patient_name: "Alice Brown",
+          reason: "Follow-up",
+        },
+      ];
+
+      let timeSlots = generateTimeSlots();
+      assignBookings(timeSlots, apiBookings);
+      renderSchedule(timeSlots);
+    </script>
+  </body>
 </html>
